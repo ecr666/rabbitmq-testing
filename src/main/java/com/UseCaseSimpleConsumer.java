@@ -25,7 +25,7 @@ import com.rabbitmq.client.ConnectionFactory;
  * Created by eranda on 2/9/15.
  */
 public class UseCaseSimpleConsumer {
-	private final static String QUEUE_NAME = "queue1";
+	private final static String ROUTE_KEY = "queue1";
 	public static void main(String[] argv)
 			throws java.io.IOException {
 		ConnectionFactory factory = new ConnectionFactory();
@@ -51,7 +51,7 @@ public class UseCaseSimpleConsumer {
 				"    </m:order>\n" +
 				"</m:placeOrder>";
 
-		channel.basicPublish("exchange1", QUEUE_NAME , new AMQP.BasicProperties.Builder().contentType("text/plain").build(), msg.getBytes());
+		channel.basicPublish("exchange1", ROUTE_KEY , new AMQP.BasicProperties.Builder().contentType("text/plain").build(), msg.getBytes());
 		System.out.println(" [x] Sent '" + msg + "'");
 		channel.close();
 		connection.close();

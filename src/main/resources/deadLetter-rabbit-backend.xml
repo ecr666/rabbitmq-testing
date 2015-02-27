@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://ws.apache.org/ns/synapse">
+   <registry provider="org.wso2.carbon.mediation.registry.WSO2Registry">
+      <parameter name="cachableDuration">15000</parameter>
+   </registry>
+   <proxy name="AMQPProducerSample"
+          transports="http"
+          startOnLoad="true"
+          trace="enable">
+      <description/>
+      <target>
+         <inSequence>
+            <property name="OUT_ONLY" value="true"/>
+            <property name="FORCE_SC_ACCEPTED" value="true" scope="axis2"/>
+            <sequence key="incoming"/>
+         </inSequence>
+         <outSequence>
+            <send/>
+         </outSequence>
+      </target>
+   </proxy>
+   <proxy name="AMQPProxyDeadLetter"
+          transports="rabbitmq"
+          startOnLoad="true"
+          trace="disable">
+      <description/>
+      <target>
+         <inSequence>
+            <property name="correlation-id"
+                      expression="get-property('transport','rabbitmq.message.correlation.id')"/>
+            <property name="reply-to"
+                      expression="get-property('transport','RABBITMQ_REPLY_TO')"/>
+            <sequence key="incoming"/>
+         </inSequence>
+      </target>
+      <parameter name="rabbitmq.queue.name">request-queue</parameter>
+      <parameter name="rabbitmq.connection.factory">AMQPConnectionFactory</parameter>
+      <parameter name="rabbitmq.exchange.name">request-exchange</parameter>
+   </proxy>
+   <endpoint name="rabbitmq_exchange3">
+      <address uri="rabbitmq:/AMQPProxy?rabbitmq.server.host.name=localhost&amp;rabbitmq.server.port=5672&amp;rabbitmq.queue.name=queue3&amp;rabbitmq.exchange.name=exchange3"/>
+   </endpoint>
+   <sequence name="incoming" onError="back-end-fault" trace="enable">
+      <property name="OUT_ONLY" value="true"/>
+      <property name="FORCE_SC_ACCEPTED" value="true" scope="axis2"/>
+      <log level="full" separator=","/>
+      <send>
+         <endpoint>
+            <address uri="rabbitmq:/AMQPProxy?rabbitmq.server.host.name=localhost&amp;rabbitmq.server.port=5673&amp;rabbitmq.queue.name=queue2&amp;rabbitmq.exchange.name=exchange2"/>
+         </endpoint>
+      </send>
+   </sequence>
+   <sequence name="back-end-fault" trace="enable">
+      <property name="OUT_ONLY" value="true"/>
+      <property name="FORCE_SC_ACCEPTED" value="true" scope="axis2"/>
+      <log level="full"/>
+      <property name="target.endpoint" value="rabbitmq_exchange3"/>
+      <store messageStore="test-msg-store3"/>
+   </sequence>
+   <sequence name="fault">
+      <log level="full">
+         <property name="MESSAGE" value="Executing default &#34;fault&#34; sequence"/>
+         <property name="ERROR_CODE" expression="get-property('ERROR_CODE')"/>
+         <property name="ERROR_MESSAGE" expression="get-property('ERROR_MESSAGE')"/>
+      </log>
+      <drop/>
+   </sequence>
+   <sequence name="main">
+      <log/>
+      <drop/>
+   </sequence>
+   <messageStore name="test-msg-store3"/>
+   <messageProcessor class="org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor"
+                     name="test-msg-processor3"
+                     messageStore="test-msg-store3">
+      <parameter name="interval">1000</parameter>
+      <parameter name="max.deliver.attempts">100</parameter>
+   </messageProcessor>
+</definitions>

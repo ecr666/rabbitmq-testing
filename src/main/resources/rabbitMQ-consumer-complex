@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<proxy xmlns="http://ws.apache.org/ns/synapse"
+       name="AMQPProxy"
+       transports="rabbitmq"
+       statistics="disable"
+       trace="enable"
+       startOnLoad="true">
+   <target>
+      <inSequence>
+         <log level="full"/>
+         <property name="OUT_ONLY" value="true"/>
+         <property name="FORCE_SC_ACCEPTED" value="true" scope="axis2"/>
+         <send>
+            <endpoint>
+               <address uri="http://localhost:9000/services/SimpleStockQuoteService"/>
+            </endpoint>
+         </send>
+      </inSequence>
+   </target>
+   <parameter name="rabbitmq.consumer.tag">eranda</parameter>
+   <parameter name="rabbitmq.queue.name">queue1</parameter>
+   <parameter name="rabbitmq.queue.exclusive">false</parameter>
+   <parameter name="rabbitmq.connection.factory">AMQPConnectionFactory</parameter>
+   <parameter name="rabbitmq.exchange.auto.delete">true</parameter>
+   <parameter name="rabbitmq.exchange.name">exchange1</parameter>
+   <parameter name="rabbitmq.queue.auto.ack">true</parameter>
+   <parameter name="rabbitmq.queue.durable">true</parameter>
+   <parameter name="rabbitmq.queue.auto.delete">false</parameter>
+   <parameter name="rabbitmq.exchange.type">direct</parameter>
+   <parameter name="rabbitmq.exchange.durable">true</parameter>
+   <description/>
+</proxy>
+                                

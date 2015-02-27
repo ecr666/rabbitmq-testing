@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<proxy xmlns="http://ws.apache.org/ns/synapse"
+       name="AMQPProxyJmeterReceiver"
+       transports="rabbitmq"
+       statistics="disable"
+       trace="enable"
+       startOnLoad="true">
+   <target>
+      <inSequence>
+         <property name="OUT_ONLY" value="true"/>
+         <property name="FORCE_SC_ACCEPTED" value="true" scope="axis2"/>
+         <send>
+            <endpoint>
+               <address uri="rabbitmq:/AMQPProxy?rabbitmq.server.host.name=localhost&amp;rabbitmq.server.port=5672&amp;rabbitmq.queue.name=jmeterQueue2&amp;rabbitmq.exchange.name=jmeterExchange"/>
+            </endpoint>
+         </send>
+      </inSequence>
+   </target>
+   <parameter name="rabbitmq.queue.name">jmeterQueue</parameter>
+   <parameter name="rabbitmq.connection.factory">AMQPConnectionFactory</parameter>
+   <parameter name="rabbitmq.exchange.name">jmeterExchange</parameter>
+   <parameter name="rabbitmq.routing.key">jmeterRoutingKey</parameter>
+   <description/>
+</proxy>
+                                

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<proxy xmlns="http://ws.apache.org/ns/synapse"
+       name="AMQPProducerSample"
+       transports="http"
+       statistics="disable"
+       trace="disable"
+       startOnLoad="true">
+   <target>
+      <inSequence>
+        <property name="FORCE_SC_ACCEPTED" value="true" scope="axis2"/>
+        <property name="OUT_ONLY" value="true"/>
+         <send>
+            <endpoint>
+               <address uri="rabbitmq:/AMQPProxy?rabbitmq.server.host.name=localhost&amp;rabbitmq.server.port=5672&amp;rabbitmq.queue.name=queue2&amp;rabbitmq.exchange.name=exchange2"/>
+            </endpoint>
+         </send>
+      </inSequence>
+      <outSequence>
+         <drop/>
+      </outSequence>
+   </target>
+   <description/>
+</proxy>
+                                

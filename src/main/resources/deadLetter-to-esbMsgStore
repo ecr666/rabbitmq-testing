@@ -48,7 +48,6 @@
       </send>
    </sequence>
    <sequence name="back-end-fault">
-      <property name="OUT_ONLY" value="true"/>
       <property name="FORCE_SC_ACCEPTED" value="true" scope="axis2"/>
       <log level="full">
          <property name="MSG" value="Unable to send to the endpoint"/>
@@ -86,6 +85,7 @@
    <messageProcessor class="org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor"
                      name="test-msg-processor2"
                      messageStore="test-msg-store2">
+      <parameter name="message.processor.reply.sequence">receiving</parameter>
       <parameter name="interval">1000</parameter>
       <parameter name="max.deliver.attempts">100</parameter>
    </messageProcessor>

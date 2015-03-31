@@ -26,20 +26,31 @@ import com.rabbitmq.client.ConnectionFactory;
  */
 public class UseCaseSimpleConsumer {
 	private final static String ROUTE_KEY = "queue1";
+	private final static String EXCHANGE_NAME = "exchange1";
+
 	public static void main(String[] argv)
 			throws java.io.IOException {
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost("localhost");
-		factory.setPort(5672);
 		Connection connection = factory.newConnection();
 		Channel channel = connection.createChannel();
 
 		try{
-			channel.exchangeDeclarePassive("exchange1");
+			channel.exchangeDeclarePassive(EXCHANGE_NAME);
 		}
 		catch(java.io.IOException e){
-			channel.exchangeDeclare("exchange1","direct");
+			if(!channel.isOpen())    channel=connection.createChannel();
+			channel.exchangeDeclare(EXCHANGE_NAME,"direct");
 		}
+		try{
+			channel.queueDeclarePassive(ROUTE_KEY);
+		}
+		catch(java.io.IOException e){
+			if(!channel.isOpen())    channel=connection.createChannel();
+			channel.queueDeclare(ROUTE_KEY,false,false,false,null);
+		}
+
+		channel.queueBind(ROUTE_KEY,EXCHANGE_NAME,ROUTE_KEY);
 
 		String param="IBM";
 		String msg=
@@ -51,7 +62,7 @@ public class UseCaseSimpleConsumer {
 				"    </m:order>\n" +
 				"</m:placeOrder>";
 
-		channel.basicPublish("exchange1", ROUTE_KEY , new AMQP.BasicProperties.Builder().contentType("text/plain").build(), msg.getBytes());
+		channel.basicPublish(EXCHANGE_NAME, ROUTE_KEY , new AMQP.BasicProperties.Builder().contentType("text/plain").build(), msg.getBytes());
 		System.out.println(" [x] Sent '" + msg + "'");
 		channel.close();
 		connection.close();
